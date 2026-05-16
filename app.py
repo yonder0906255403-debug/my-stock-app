@@ -2,31 +2,35 @@ import streamlit as st
 import yfinance as yf
 import feedparser
 import urllib.parse
-from PIL import Image  # 👈 新增這行：用來處理圖片
+from PIL import Image  # 👈 確保有這一行來讀取你的 logo.png
 import os
 
-# 1. 檢查資料夾裡有沒有 logo.png，有的話就讀取，沒有就用 📈 貼圖當備份
+# 1. 精準對準你的照片檔名：logo.png
 logo_path = "logo.png"
 if os.path.exists(logo_path):
     page_icon_image = Image.open(logo_path)
 else:
-    page_icon_image = "📈"
+    page_icon_image = "📈"  # 防呆：萬一找不到就用貼圖
 
-# 2. 將網頁的小圖示設定換成你的圖片
-st.set_page_config(page_title="股票新聞整合器", page_icon=page_icon_image, layout="centered")
+# 2. 網頁標題與小圖示設定
+st.set_page_config(
+    page_title="股票新聞整合器", 
+    page_icon=page_icon_image,  # 👈 這裡成功換成你的阿北照片！
+    layout="centered"
+)
 
 st.title("📈 股票近期新聞智慧整合器")
 st.write("手動輸入股票代號，一鍵抓取並整合最新市場新聞。")
 
 # 讓使用者輸入代號的文字方塊
-ticker_input = st.text_input("請輸入股票代號（美股如 AAPL，台股請加 .TW 如 2317.TW）", "2317.TW")
+ticker_input = st.text_input("請輸入股票代號（美股如 AAPL，台股請加 .TW 如 2330.TW）", "2317.TW")
 
 if st.button("開始整合新聞"):
     ticker = ticker_input.strip().upper()
     
     with st.spinner('正在搜尋最新新聞，請稍候...'):
         try:
-            # 1. 依然使用 yfinance 抓取即時股價與公司名稱
+            # 1. 使用 yfinance 抓取即時股價與公司名稱
             stock = yf.Ticker(ticker)
             info = stock.info
             company_name = info.get('longName', '未知公司')
@@ -40,8 +44,7 @@ if st.button("開始整合新聞"):
             st.markdown("---")
             st.subheader("📰 近期相關新聞 (Google 新聞即時整合)")
             
-            # 2. 改用 Google News RSS 抓取繁體中文新聞
-            # 我們用公司名稱去搜尋 Google 新聞，準確度最高
+            # 2. 使用 Google News RSS 抓取繁體中文新聞
             search_keyword = company_name if company_name != '未知公司' else ticker
             encoded_keyword = urllib.parse.quote(search_keyword)
             
@@ -61,7 +64,6 @@ if st.button("開始整合新聞"):
                     pub_date = entry.get('published', '時間未知')
                     
                     # Google 新聞標題格式通常是：「新聞標題 - 媒體名稱」
-                    # 我們手動把它切開，讓畫面更漂亮
                     if " - " in raw_title:
                         title, publisher = raw_title.rsplit(" - ", 1)
                     else:
@@ -69,7 +71,7 @@ if st.button("開始整合新聞"):
                     
                     # 簡化時間顯示
                     if pub_date != '時間未知':
-                        date_str = pub_date[:16] # 擷取日期與時間段
+                        date_str = pub_date[:16]
                     else:
                         date_str = "未知"
                     
