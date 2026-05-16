@@ -2,9 +2,19 @@ import streamlit as st
 import yfinance as yf
 import feedparser
 import urllib.parse
+from PIL import Image  # 👈 新增這行：用來處理圖片
+import os
 
-# 網頁標題與小圖示設定
-st.set_page_config(page_title="股票新聞整合器", page_icon="📈", layout="centered")
+# 1. 檢查資料夾裡有沒有 logo.png，有的話就讀取，沒有就用 📈 貼圖當備份
+logo_path = "logo.png"
+if os.path.exists(logo_path):
+    page_icon_image = Image.open(logo_path)
+else:
+    page_icon_image = "📈"
+
+# 2. 將網頁的小圖示設定換成你的圖片
+st.set_page_config(page_title="股票新聞整合器", page_icon=page_icon_image, layout="centered")
+
 st.title("📈 股票近期新聞智慧整合器")
 st.write("手動輸入股票代號，一鍵抓取並整合最新市場新聞。")
 
